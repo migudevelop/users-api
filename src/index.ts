@@ -1,14 +1,13 @@
-import express from 'express'
-const app = express()
-app.use(express.json())
+import { connect } from 'mongoose'
+import app from './app'
+import dotenv from 'dotenv'
 
-const PORT = 3000
-
-app.get('/ping', (_req, res) => {
-  console.log('llega')
-  res.send('pong')
-})
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+dotenv.config()
+const port: string = process?.env?.PORT ?? '3005'
+const dbURL: string = process?.env?.DB_URL ?? ''
+const dbName: string = process?.env?.DB_NAME ?? ''
+connect(`${dbURL}/${dbName}`)
+  .then(() => {
+    app.listen(port, () => console.log(`Conected in port: ${port}`))
+  })
+  .catch((err) => console.log(err))
