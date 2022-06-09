@@ -1,2 +1,2 @@
-# products-api
-CRUD api products
+# users-api
+CRUD api users
