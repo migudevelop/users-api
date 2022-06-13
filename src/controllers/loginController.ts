@@ -1,21 +1,56 @@
+import bcrypt from 'bcryptjs'
 import { Request, Response } from 'express'
-// const bcrypt = require('bcryptjs')
-import { COMMON_MESSAGES, RESPONSE_CODES } from '@src/constants'
-// import { User } from '@src/models'
-import { IEUser } from '@src/types'
-import { createResponseErrorMessage, validateUserLoginParams } from '@src/utils'
+import { RESPONSE_CODES, USER_MESSAGES } from '@src/constants'
+import { User } from '@src/models'
+import { IELogin } from '@src/types'
+import {
+  createResponseErrorMessage,
+  createResponseIncorretDataValidation,
+  createToken,
+  validateUserLoginParams
+} from '@src/utils'
 
 const controller = {
   login: (req: Request, res: Response) => {
-    const params: IEUser = req.body
-    // const { name, surname, email, password } = params
+    const params: IELogin = req.body
+    const { email, password, getToken } = params
     if (!validateUserLoginParams(params)) {
-      return createResponseErrorMessage(
-        res,
-        RESPONSE_CODES.ERRORS.CLIENT_SIDE.BAD_REQUEST,
-        COMMON_MESSAGES.INCORRET_DATA_VALIDATION
-      )
+      return createResponseIncorretDataValidation(res)
     }
+    User.findOne({ email: email.toLowerCase() }, (err, user) => {
+      if (err) {
+        return createResponseErrorMessage(
+          res,
+          RESPONSE_CODES.ERRORS.SERVER_SIDE.INTERNAL_SERVER_ERROR,
+          USER_MESSAGES.ERROR_IDENTIFY
+        )
+      }
+      if (!user) {
+        return createResponseErrorMessage(
+          res,
+          RESPONSE_CODES.ERRORS.CLIENT_SIDE.NOT_FOUND,
+          USER_MESSAGES.USER_NOT_EXIST
+        )
+      }
+      bcrypt.compare(password, user.password, (_err, check) => {
+        user.password = null
+        if (check && getToken) {
+          return res
+            .status(RESPONSE_CODES.SUCCESS)
+            .send({ token: createToken(user) })
+        }
+        if (check) {
+          return res
+            .status(RESPONSE_CODES.SUCCESS)
+            .send({ success: true, user })
+        }
+        return createResponseErrorMessage(
+          res,
+          RESPONSE_CODES.ERRORS.CLIENT_SIDE.UNAUTHORIZED,
+          USER_MESSAGES.INCORRECT_CREDENTIALS
+        )
+      })
+    })
   }
 }
 

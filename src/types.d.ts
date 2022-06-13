@@ -7,6 +7,7 @@ export enum Role {
 export type Roles = Role.Admin | Role.Viewer | Role.Editor
 
 export interface IEUser {
+  _id: String
   name: string
   surname: string
   email: string
@@ -15,4 +16,6 @@ export interface IEUser {
   role?: Roles
 }
 
-export type Login = Pick<IEUser, 'email' | 'password'>
+export interface IELogin extends Pick<IEUser, 'email' | 'password'> {
+  getToken?: boolean | undefined
+}

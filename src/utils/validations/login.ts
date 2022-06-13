@@ -1,11 +1,11 @@
 import validator from 'validator'
-import { Login } from '@src/types'
+import { IELogin } from '@src/types'
 const { isEmpty, isEmail } = validator
 
 export const validateUserLoginParams = ({
   email = '',
   password = ''
-}: Login): boolean => {
+}: IELogin): boolean => {
   try {
     const validateEmail: boolean = !isEmpty(email) && isEmail(email)
     const validatePassword: boolean = !isEmpty(password)
