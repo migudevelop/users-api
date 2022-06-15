@@ -1,26 +1,30 @@
-import { Request, Response, NextFunction } from 'express'
+import { Response, NextFunction } from 'express'
+import moment from 'moment'
 import { COMMON_MESSAGES, RESPONSE_CODES } from '@src/constants'
-import { createResponseErrorMessage } from '@src/utils'
+import { createResponseErrorMessage, decodeToken } from '@src/utils'
 
 export const authenticated = (
-  _req: Request,
+  req: any,
   res: Response,
   next: NextFunction
-): void => {
-  // const authorized = req?.headers?.authorization ?? false
-  // if (!authorized) {
-  //   createResponseErrorMessage(
-  //     res,
-  //     RESPONSE_CODES.ERRORS.CLIENT_SIDE.UNAUTHORIZED,
-  //     COMMON_MESSAGES.UNAUTHORIZED_REQUEST
-  //   )
-  // }
-  // const token = req?.headers?.authorization?.replace(/['"]+/g, '') ?? ''
-  // let payload = null
+): Response<any, Record<string, any>> | undefined => {
+  const authorized = req?.headers?.authorization ?? false
+  if (!authorized) {
+    createResponseErrorMessage(
+      res,
+      RESPONSE_CODES.ERRORS.CLIENT_SIDE.UNAUTHORIZED,
+      COMMON_MESSAGES.UNAUTHORIZED_REQUEST
+    )
+  }
+  const token = req?.headers?.authorization?.replace(/['"]+/g, '') ?? ''
+  let payload: any = null
   try {
-    // payload = decodeToken(token)
-    // if (payload.exp <= moment().unix())
-    //   return res.status(401).send({ message: MESSAGES.TOKEN_EXPIRED })
+    payload = decodeToken(token)
+    if (payload?.exp <= moment().unix()) {
+      return res
+        .status(RESPONSE_CODES.ERRORS.CLIENT_SIDE.UNAUTHORIZED)
+        .send({ message: COMMON_MESSAGES.TOKEN_EXPIRED })
+    }
   } catch (err) {
     return createResponseErrorMessage(
       res,
@@ -28,6 +32,6 @@ export const authenticated = (
       COMMON_MESSAGES.NOT_VALID_TOKEN
     )
   }
-  // req?.user = payload
+  req.user = payload
   next()
 }

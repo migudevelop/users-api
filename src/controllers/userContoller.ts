@@ -7,7 +7,8 @@ import {
   createResponseErrorMessage,
   createResponseIncorretDataValidation,
   createResponseSuccess,
-  validateCreateUserParams
+  validateCreateUserParams,
+  validateUpdateUserParams
 } from '@src/utils'
 
 const controller = {
@@ -57,6 +58,52 @@ const controller = {
         )
       }
     })
+  },
+  update: (req: Request, res: Response) => {
+    const params: IEUser = req.body
+    if (!validateUpdateUserParams(params)) {
+      return createResponseIncorretDataValidation(res)
+    }
+
+    // const newUser = new User({
+    //   name,
+    //   surname,
+    //   email
+    // })
+
+    // User.findOne({ email }, (err, issetUser) => {
+    //   if (err) {
+    //     return createResponseErrorMessage(
+    //       res,
+    //       RESPONSE_CODES.ERRORS.SERVER_SIDE.INTERNAL_SERVER_ERROR,
+    //       USER_MESSAGES.ERROR_CHECK_USER_EXIST
+    //     )
+    //   }
+    //   if (!issetUser) {
+    //     bcrypt.hash(password, bcrypt.genSaltSync(10), (_err, hash) => {
+    //       newUser.password = hash
+    //       newUser.save((err, userStored) => {
+    //         if (err ?? !userStored) {
+    //           return createResponseErrorMessage(
+    //             res,
+    //             RESPONSE_CODES.ERRORS.SERVER_SIDE.INTERNAL_SERVER_ERROR,
+    //             USER_MESSAGES.ERROR_SAVING_USER
+    //           )
+    //         }
+    //         return createResponseSuccess(res, {
+    //           success: true,
+    //           user: userStored
+    //         })
+    //       })
+    //     })
+    //   } else {
+    //     return createResponseErrorMessage(
+    //       res,
+    //       RESPONSE_CODES.ERRORS.SERVER_SIDE.INTERNAL_SERVER_ERROR,
+    //       USER_MESSAGES.USER_ALRERY_REGISTERED
+    //     )
+    //   }
+    // })
   },
   getUsers: (_req: Request, res: Response) => {
     User.find().exec((err, users) => {

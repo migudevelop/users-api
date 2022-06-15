@@ -16,6 +16,12 @@ const UserSchema = new Schema<IEUser>({
   role: { type: String, required: true, default: 'admin' }
 })
 
+UserSchema.methods.toJSON = function () {
+  const obj = this.toObject()
+  delete obj.password
+  return obj
+}
+
 const User = model<IEUser>('User', UserSchema)
 
 export default User

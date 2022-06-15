@@ -1,5 +1,9 @@
 import { IEUser } from '@src/types'
 import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
 const CONFIG_KEY = process?.env?.TOKEN_SECRET ?? ''
 
 export const createToken = ({
@@ -16,7 +20,6 @@ export const createToken = ({
     email,
     role
   }
-
   return jwt.sign(payload, CONFIG_KEY, { expiresIn: '7d' })
 }
 

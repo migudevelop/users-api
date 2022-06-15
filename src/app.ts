@@ -1,8 +1,6 @@
 import express from 'express'
-import dotenv from 'dotenv'
 import { loginActions, usersRoutes } from '@routes/index'
 
-dotenv.config()
 const app = express()
 
 const API_URL_NAME = '/api'

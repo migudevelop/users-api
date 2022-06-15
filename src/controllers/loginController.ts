@@ -13,7 +13,7 @@ import {
 const controller = {
   login: (req: Request, res: Response) => {
     const params: IELogin = req.body
-    const { email, password, getToken } = params
+    const { email, password } = params
     if (!validateUserLoginParams(params)) {
       return createResponseIncorretDataValidation(res)
     }
@@ -34,15 +34,10 @@ const controller = {
       }
       bcrypt.compare(password, user.password, (_err, check) => {
         user.password = null
-        if (check && getToken) {
-          return res
-            .status(RESPONSE_CODES.SUCCESS)
-            .send({ token: createToken(user) })
-        }
         if (check) {
           return res
             .status(RESPONSE_CODES.SUCCESS)
-            .send({ success: true, user })
+            .send({ success: true, user, token: createToken(user) })
         }
         return createResponseErrorMessage(
           res,

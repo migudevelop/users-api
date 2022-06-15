@@ -15,7 +15,8 @@ export interface IEUser {
   createAt: Date
   role?: Roles
 }
-
-export interface IELogin extends Pick<IEUser, 'email' | 'password'> {
-  getToken?: boolean | undefined
+export interface IEPayloadJwt extends IEUser {
+  exp?: number | string
 }
+
+export type IELogin = Pick<IEUser, 'email' | 'password'>
