@@ -16,5 +16,6 @@ export const createResponseIncorretDataValidation = (res: Response): Response =>
 
 export const createResponseSuccess = (
   res: Response,
-  responseData: any
-): Response => res.status(RESPONSE_CODES.SUCCESS).send(responseData)
+  responseData: any = {}
+): Response =>
+  res.status(RESPONSE_CODES.SUCCESS).send({ success: true, ...responseData })

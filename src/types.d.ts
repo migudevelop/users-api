@@ -1,3 +1,5 @@
+import { Request } from 'express'
+
 export enum Role {
   Admin = 'admin',
   Viewer = 'viewer',
@@ -7,7 +9,7 @@ export enum Role {
 export type Roles = Role.Admin | Role.Viewer | Role.Editor
 
 export interface IEUser {
-  _id: String
+  _id?: String | undefined
   name: string
   surname: string
   email: string
@@ -17,6 +19,10 @@ export interface IEUser {
 }
 export interface IEPayloadJwt extends IEUser {
   exp?: number | string
+}
+
+export interface IERequest extends Request {
+  user?: IEUser | undefined
 }
 
 export type IELogin = Pick<IEUser, 'email' | 'password'>

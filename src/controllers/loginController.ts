@@ -6,6 +6,7 @@ import { IELogin } from '@src/types'
 import {
   createResponseErrorMessage,
   createResponseIncorretDataValidation,
+  createResponseSuccess,
   createToken,
   validateUserLoginParams
 } from '@src/utils'
@@ -35,9 +36,7 @@ const controller = {
       bcrypt.compare(password, user.password, (_err, check) => {
         user.password = null
         if (check) {
-          return res
-            .status(RESPONSE_CODES.SUCCESS)
-            .send({ success: true, user, token: createToken(user) })
+          return createResponseSuccess(res, { user, token: createToken(user) })
         }
         return createResponseErrorMessage(
           res,

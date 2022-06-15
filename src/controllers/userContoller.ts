@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs'
 import { Request, Response } from 'express'
 import { RESPONSE_CODES, USER_MESSAGES } from '@src/constants'
 import { User } from '@src/models'
-import { IEUser } from '@src/types'
+import { IERequest, IEUser } from '@src/types'
 import {
   createResponseErrorMessage,
   createResponseIncorretDataValidation,
@@ -45,7 +45,6 @@ const controller = {
               )
             }
             return createResponseSuccess(res, {
-              success: true,
               user: userStored
             })
           })
@@ -59,51 +58,47 @@ const controller = {
       }
     })
   },
-  update: (req: Request, res: Response) => {
+  update: (req: IERequest, res: Response) => {
     const params: IEUser = req.body
     if (!validateUpdateUserParams(params)) {
       return createResponseIncorretDataValidation(res)
     }
 
-    // const newUser = new User({
-    //   name,
-    //   surname,
-    //   email
-    // })
-
-    // User.findOne({ email }, (err, issetUser) => {
-    //   if (err) {
-    //     return createResponseErrorMessage(
-    //       res,
-    //       RESPONSE_CODES.ERRORS.SERVER_SIDE.INTERNAL_SERVER_ERROR,
-    //       USER_MESSAGES.ERROR_CHECK_USER_EXIST
-    //     )
-    //   }
-    //   if (!issetUser) {
-    //     bcrypt.hash(password, bcrypt.genSaltSync(10), (_err, hash) => {
-    //       newUser.password = hash
-    //       newUser.save((err, userStored) => {
-    //         if (err ?? !userStored) {
-    //           return createResponseErrorMessage(
-    //             res,
-    //             RESPONSE_CODES.ERRORS.SERVER_SIDE.INTERNAL_SERVER_ERROR,
-    //             USER_MESSAGES.ERROR_SAVING_USER
-    //           )
-    //         }
-    //         return createResponseSuccess(res, {
-    //           success: true,
-    //           user: userStored
-    //         })
-    //       })
-    //     })
-    //   } else {
-    //     return createResponseErrorMessage(
-    //       res,
-    //       RESPONSE_CODES.ERRORS.SERVER_SIDE.INTERNAL_SERVER_ERROR,
-    //       USER_MESSAGES.USER_ALRERY_REGISTERED
-    //     )
-    //   }
-    // })
+    User.findOneAndUpdate(
+      { _id: req?.user?._id },
+      params,
+      { new: true },
+      (err, userUpdated) => {
+        if (err ?? !userUpdated) {
+          return createResponseErrorMessage(
+            res,
+            RESPONSE_CODES.ERRORS.SERVER_SIDE.INTERNAL_SERVER_ERROR,
+            USER_MESSAGES.ERROR_UPDATING_USER
+          )
+        }
+        return createResponseSuccess(res, { userUpdated })
+      }
+    )
+  },
+  delete: (req: Request, res: Response) => {
+    User.deleteOne({ _id: req.params.userId })
+      .then(({ deletedCount = 0 }) => {
+        if (deletedCount === 0) {
+          return createResponseErrorMessage(
+            res,
+            RESPONSE_CODES.ERRORS.SERVER_SIDE.INTERNAL_SERVER_ERROR,
+            USER_MESSAGES.USER_NOT_EXIST
+          )
+        }
+        return createResponseSuccess(res, { deletedCount })
+      })
+      .catch(() =>
+        createResponseErrorMessage(
+          res,
+          RESPONSE_CODES.ERRORS.SERVER_SIDE.INTERNAL_SERVER_ERROR,
+          USER_MESSAGES.ERROR_DELETING_USER
+        )
+      )
   },
   getUsers: (_req: Request, res: Response) => {
     User.find().exec((err, users) => {
@@ -114,7 +109,7 @@ const controller = {
           USER_MESSAGES.USER_NOT_EXIST
         )
       }
-      return createResponseSuccess(res, { success: true, users })
+      return createResponseSuccess(res, { users })
     })
   },
   getUser: (req: Request, res: Response) => {
@@ -126,7 +121,7 @@ const controller = {
           USER_MESSAGES.USER_NOT_EXIST
         )
       }
-      return createResponseSuccess(res, { success: true, user })
+      return createResponseSuccess(res, { user })
     })
   }
 }
